@@ -30,7 +30,7 @@ public class Gui extends JPanel {
         solr.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 chooser = new JFileChooser();
-                chooser.setCurrentDirectory(new java.io.File("C:\\Users\\m.klepacz\\Desktop\\przyrosty\\!2019"));
+                chooser.setCurrentDirectory(new java.io.File("files"));
                 chooser.setDialogTitle(choosertitle);
                 if (chooser.showOpenDialog(getParent()) == JFileChooser.APPROVE_OPTION) {
                     System.out.println("getSelectedFile() : "
@@ -51,7 +51,7 @@ public class Gui extends JPanel {
         files.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 chooser = new JFileChooser();
-                chooser.setCurrentDirectory(new java.io.File("C:\\Users\\m.klepacz\\Documents"));
+                chooser.setCurrentDirectory(new java.io.File("files"));
                 chooser.setDialogTitle(choosertitle);
                 if (chooser.showOpenDialog(getParent()) == JFileChooser.APPROVE_OPTION) {
                     System.out.println("getSelectedFile() : "
