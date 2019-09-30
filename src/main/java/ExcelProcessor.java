@@ -46,18 +46,16 @@ public class ExcelProcessor {
                         case 1:
                             ean = cell.getStringCellValue();
                             if(ean.length() == 13) ean = "0" + ean;
-                            if(!ean.equals(eanPoprzedni)) tytul = null;
+                            if(ean.equals(eanPoprzedni)) tytul = null;
                             //System.out.println(ean + " " + ean.length());
                             break;
                         case 2:
                             rodzjaWskazania = cell.getStringCellValue();
                             break;
                         case 3:
-
                             if (cell.getCellType() == CellType.STRING)
                             poziomWskazania = cell.getStringCellValue();
                             else poziomWskazania = String.valueOf(cell.getNumericCellValue());
-
                             break;
                         case 4:
                             wskazanie = cell.getStringCellValue();
@@ -65,17 +63,19 @@ public class ExcelProcessor {
                                 wskazanie = wskazanie.replace("\n"," ");
                             }
                             if(poziomWskazania != null ) {
-                                if(Pattern.matches("\\d{1}.0",poziomWskazania)) {
-                                    System.out.println(Pattern.matches("\\d{1}.0",poziomWskazania));
-                                    if(tytul != null) wskazanie = tytul + " " + wskazanie;
+                                if(Pattern.matches("\\d{1}\\.0",poziomWskazania) || poziomWskazania.length() == 1) {
+                                    //System.out.println(Pattern.matches("\\d{1}.0",poziomWskazania));
+                                    //if(tytul != null) wskazanie = tytul + " " + wskazanie;
                                     tytul = wskazanie;
+                                    //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
                                 }
                                 else {
-                                    System.out.println(Pattern.matches("\\d{1}.0",poziomWskazania));
-                                    //tytul = wskazanie;
+                                    //System.out.println(Pattern.matches("\\d{1}.0",poziomWskazania));
+                                    //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
+                                    wskazanie = tytul + wskazanie;
                                 }
                             }
-                            System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
+                            //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
                             break;
                         case 5:
                             if(cell.getCellType() == CellType.STRING)  poziomOdplatnosci = cell.getStringCellValue();
@@ -88,15 +88,13 @@ public class ExcelProcessor {
                             break;
                     }
                 }
-                /*
+
                 System.out.println("EAN: " + ean
                         + " poziomOdplatnosci: " + poziomOdplatnosci
                         + " wskaznie: " + wskazanie
                         + " rodzaj wskazania: " + rodzjaWskazania
                         + " poziom wskazania: " + poziomWskazania
                 );
-
-                 */
                 eanPoprzedni = ean;
                 if(ean != null && poziomOdplatnosci != null && wskazanie != null && rodzjaWskazania != null) {
                     xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiek);
