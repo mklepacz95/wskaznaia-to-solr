@@ -62,7 +62,7 @@ public class XmlProcessor {
                                 wskazanieElementToAdd.appendChild(doc.createTextNode(wskazanie));
                                 wskazanieElementToAdd.setAttribute("czyWszystkie","false");
                                 wskazanieElementToAdd.setAttribute("rodzajWskazania",rodzajWskazania);
-                                wskazanieElementToAdd.setAttribute("wiek",wiek);
+                                if(!wiek.equals("")) wskazanieElementToAdd.setAttribute("wiek",wiek);
                                 wskazniaNode.appendChild(wskazanieElementToAdd);
 
                                 TransformerFactory transformerFactory = TransformerFactory.newInstance();

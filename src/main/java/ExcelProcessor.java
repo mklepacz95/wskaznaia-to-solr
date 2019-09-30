@@ -88,7 +88,6 @@ public class ExcelProcessor {
                             break;
                     }
                 }
-
                 System.out.println("EAN: " + ean
                         + " poziomOdplatnosci: " + poziomOdplatnosci
                         + " wskaznie: " + wskazanie
