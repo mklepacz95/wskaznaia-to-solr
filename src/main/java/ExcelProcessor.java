@@ -30,6 +30,7 @@ public class ExcelProcessor {
 
             Iterator<Row> rowIterator = sheet.iterator();
             String tytul = null;
+            String poziomPoprzedni = "";
             while(rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 Iterator<Cell> cellIterator = row.cellIterator();
@@ -37,7 +38,9 @@ public class ExcelProcessor {
                 String rodzjaWskazania = null;
                 String wskazanie = null;
                 String poziomOdplatnosci = null;
-                String wiek = null;
+                String wiek = "";
+                String wiekOd = "";
+                String wiekDo = "";
                 String poziomWskazania = null;
                 String eanPoprzedni = null;
                 while(cellIterator.hasNext()) {
@@ -51,28 +54,57 @@ public class ExcelProcessor {
                             break;
                         case 2:
                             rodzjaWskazania = cell.getStringCellValue();
+                            rodzjaWskazania = rodzjaWskazania.trim();
+                        if(rodzjaWskazania.equals("CHPL") || rodzjaWskazania.equals("ChPl")) rodzjaWskazania = "ChPL";
                             break;
                         case 3:
-                            if (cell.getCellType() == CellType.STRING)
-                            poziomWskazania = cell.getStringCellValue();
+                            if (cell.getCellType() == CellType.STRING) {
+                                poziomWskazania = cell.getStringCellValue();
+                            }
                             else poziomWskazania = String.valueOf(cell.getNumericCellValue());
+                            poziomWskazania.trim();
+                            System.out.println(poziomWskazania);
+                            if(poziomWskazania.contains(".")) {
+                                if(poziomWskazania.substring(poziomWskazania.indexOf(".") + 1,poziomWskazania.indexOf(".") + 2).equals("0")) {
+                                    //System.out.println("index: " + poziomWskazania.indexOf("."));
+                                    poziomWskazania = poziomWskazania.substring(0,poziomWskazania.indexOf("."));
+                                }
+                            }
+//                            System.out.println(poziomWskazania);
+//                            System.out.println("test " + poziomWskazania.contains(".") + " " + poziomWskazania);
+//                            //System.out.println(poziomWskazania.substring(0,1));
                             break;
                         case 4:
                             wskazanie = cell.getStringCellValue();
                             if(wskazanie.contains("\n")) {
                                 wskazanie = wskazanie.replace("\n"," ");
                             }
+                            if(!poziomWskazania.contains(poziomPoprzedni)) {
+                                tytul = "";
+                            }
+                            wskazanie = wskazanie.trim();
+                            wskazanie = wskazanie.replaceFirst(wskazanie.substring(0, 1), wskazanie.substring(0, 1).toUpperCase());
                             if(poziomWskazania != null ) {
-                                if(Pattern.matches("\\d{1}\\.0",poziomWskazania) || poziomWskazania.length() == 1) {
+                                if(Pattern.matches("\\d{1,2}\\.0",poziomWskazania) || poziomWskazania.length() == 1) {
                                     //System.out.println(Pattern.matches("\\d{1}.0",poziomWskazania));
                                     //if(tytul != null) wskazanie = tytul + " " + wskazanie;
+                                    wskazanie = wskazanie.replaceFirst(wskazanie.substring(0, 1), wskazanie.substring(0, 1).toUpperCase());
                                     tytul = wskazanie;
                                     //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
+                                    System.out.println("Pattern");
                                 }
                                 else {
-                                    //System.out.println(Pattern.matches("\\d{1}.0",poziomWskazania));
-                                    //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
-                                    wskazanie = tytul + wskazanie;
+                                    if(!tytul.equals(wskazanie)) {
+                                        //System.out.println(Pattern.matches("\\d{1}.0",poziomWskazania));
+                                        //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
+                                        wskazanie = wskazanie.replaceFirst(wskazanie.substring(0, 1), wskazanie.substring(0, 1).toLowerCase());
+                                        if (!tytul.equals("")) {
+                                            tytul = tytul.replaceFirst(tytul.substring(0, 1), tytul.substring(0, 1).toUpperCase());
+                                            wskazanie = tytul + " " + wskazanie;
+                                        }
+                                        tytul = wskazanie;
+                                        System.out.println("no pattern");
+                                    }
                                 }
                             }
                             //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
@@ -80,23 +112,53 @@ public class ExcelProcessor {
                         case 5:
                             if(cell.getCellType() == CellType.STRING)  poziomOdplatnosci = cell.getStringCellValue();
                             else poziomOdplatnosci = String.valueOf(cell.getNumericCellValue());
-
+                            poziomOdplatnosci = poziomOdplatnosci.trim().toUpperCase();
                             if(poziomOdplatnosci.equals("R")) poziomOdplatnosci = "RYCZAŁT";
+                            else if(poziomOdplatnosci.equals("0.5")) poziomOdplatnosci = "50%";
+                            else if(poziomOdplatnosci.equals("0.3")) poziomOdplatnosci = "30%";
+                            else if(poziomOdplatnosci.equals("B") || poziomOdplatnosci.equals("bezpłatny do limitu")) poziomOdplatnosci = "BEZPŁATNY_DO_LIMITU";
                             break;
                         case 6:
                             wiek = cell.getStringCellValue();
+                            if(wiek == null) wiek = "";
+
+                                wiek = wiek.trim().toUpperCase();
+                                if(wiek.contains("DO") && wiek.contains("OD")) {
+                                    wiekDo = wiek.substring(wiek.indexOf("DO ") + 3);
+                                    wiekOd = wiek.substring(wiek.indexOf("OD ") + 3, wiek.indexOf(" DO"));
+                                    System.out.println("wiek od: " + wiekOd + " wiek do: " + wiekDo);
+                                } else if(wiek.contains("DO")) {
+                                    wiekDo = wiek.substring(wiek.indexOf("DO ") + 3).trim();
+                                    System.out.println(" wiek do: " + wiekDo);
+                                } else if(wiek.contains("OD")) {
+                                    wiekOd = wiek.substring(wiek.indexOf("OD ") + 3).trim();
+                                    System.out.println("wiek od: " + wiekOd);
+                                }
+
                             break;
                     }
                 }
+                /*
                 System.out.println("EAN: " + ean
                         + " poziomOdplatnosci: " + poziomOdplatnosci
                         + " wskaznie: " + wskazanie
                         + " rodzaj wskazania: " + rodzjaWskazania
                         + " poziom wskazania: " + poziomWskazania
                 );
+
+                 */
+
                 eanPoprzedni = ean;
+                poziomPoprzedni = poziomWskazania;
+                String next = "";
+                //System.out.println(sheet.getRow(row.getRowNum() + 1).getCell(3).getStringCellValue());
+                if (sheet.getRow(row.getRowNum() + 1).getCell(3).getCellType() == CellType.STRING) {
+                    next = sheet.getRow(row.getRowNum() + 1).getCell(3).getStringCellValue();
+                }
+                else next = String.valueOf(sheet.getRow(row.getRowNum() + 1).getCell(3).getNumericCellValue());
+                if(!next.contains(poziomWskazania))
                 if(ean != null && poziomOdplatnosci != null && wskazanie != null && rodzjaWskazania != null) {
-                    xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiek);
+                    xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo);
                 }
             }
             file.close();
