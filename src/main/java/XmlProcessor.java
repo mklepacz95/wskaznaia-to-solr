@@ -13,6 +13,8 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.lang.annotation.ElementType;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 public class XmlProcessor {
@@ -25,13 +27,12 @@ public class XmlProcessor {
 
     public XmlProcessor(){}
 
-    public void dodajWskazanieDoXml(String ean, String poziomOdplatnosci, String wskazanie, String rodzajWskazania, String wiekOd, String wiekDo) {
+    public void dodajWskazanieDoXml(String ean, String poziomOdplatnosci, String wskazanie, String rodzajWskazania, String wiekOd, String wiekDo, String idWskazania) {
         try {
             File file = new File(pathTofile);
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            //File output = new File("file/solrWskazania.xml");
-            //PrintWriter pw = new PrintWriter(output);
+
 
             Document doc = builder.parse(file);
 
@@ -42,10 +43,8 @@ public class XmlProcessor {
                 Element e = (Element) n;
 
                 Node eanNode = e.getElementsByTagName("EAN").item(0);
-                //System.out.println(eanNode.getTextContent().trim());
+
                 if (eanNode.getTextContent().trim().equals(ean)) {
-                    //System.out.println(eanNode.getTextContent() + " z XMLa" + "nazwa parnet node " + eanNode.getParentNode().getNodeName());
-                    //Node opakowanie = eanNode.getParentNode();
                     Element opakowanieLekuElement = (Element) eanNode.getParentNode();
                     NodeList refundacje = opakowanieLekuElement.getElementsByTagName("Refundacja");
                     for (int j = 0; j < refundacje.getLength(); j++) {
@@ -54,43 +53,29 @@ public class XmlProcessor {
                         NodeList refundacjaNode = refdacjaElement.getElementsByTagName("poziomOdplatnosciEnum");
                         if (refundacjaNode.getLength() != 0) {
                             if (refundacjaNode.item(0).getTextContent().equals(poziomOdplatnosci)) {
-                                //System.out.println("z xml: " + refdacjaElement.getElementsByTagName("poziomOdplatnosciEnum").item(0).getTextContent());
+
 
                                 NodeList wskazania = ((Element) refundacja).getElementsByTagName("wskazania");
                                 Node wskazniaNode = wskazania.item(0);
-//                                wskazniaNode.setTextContent("text");
-                                //System.out.println(wskazniaNode.getTextContent());
+//
                                 Element wskazanieElementToAdd = doc.createElement("wskazanie");
                                 wskazanieElementToAdd.appendChild(doc.createTextNode(wskazanie));
                                 wskazanieElementToAdd.setAttribute("czyWszystkie", "false");
 
-                                if (rodzajWskazania.equals("RYCZAŁT")) {
+                                if (rodzajWskazania.equals("RYCZAŁT") || rodzajWskazania.equals("R")) {
                                     wskazanieElementToAdd.setAttribute("rodzajWskazania", "P");
                                 } else {
                                     wskazanieElementToAdd.setAttribute("rodzajWskazania", rodzajWskazania);
                                 }
-                                /*
-                                if(!wiek.equals("") || !wiek.equals(" ")) {
-                                    wskazanieElementToAdd.setAttribute("wiek",wiek);
-                                    wskazniaNode.appendChild(wskazanieElementToAdd);
-                                } else {
-                                    wskazniaNode.appendChild(wskazanieElementToAdd);
-                                }
 
-                                 */
                                 if (!wiekOd.equals("")) {
                                     wskazanieElementToAdd.setAttribute("wiekOd", wiekOd);
                                 }
                                 if (!wiekDo.equals("")) {
                                     wskazanieElementToAdd.setAttribute("wiekDo", wiekDo);
                                 }
-                                /*
-                                else {
-                                    wskazanieElementToAdd.setAttribute("wiek",wiek);
-                                    wskazniaNode.appendChild(wskazanieElementToAdd);
-                                }
+                                wskazanieElementToAdd.setAttribute("idWskazania",idWskazania);
 
-                                 */
                                 wskazniaNode.appendChild(wskazanieElementToAdd);
 
 
@@ -100,6 +85,66 @@ public class XmlProcessor {
                                 StreamResult streamResult = new StreamResult(new File(pathTofile));
 
                                 transformer.transform(domSource, streamResult);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void dodajIdWskazaniaA2A3(String ean, String poziomOdplatnosci, String idWskazania) {
+        try {
+            File file = new File(pathTofile);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+
+
+            Document doc = builder.parse(file);
+
+            NodeList nodeList = doc.getElementsByTagName("OpakowanieLeku");
+
+            for(int i = 0; i< nodeList.getLength();i++) {
+                Node n = nodeList.item(i);
+                Element e = (Element) n;
+
+                Node eanNode = e.getElementsByTagName("EAN").item(0);
+
+                if (eanNode.getTextContent().trim().equals(ean)) {
+                    Element opakowanieLekuElement = (Element) eanNode.getParentNode();
+                    NodeList refundacje = opakowanieLekuElement.getElementsByTagName("Refundacja");
+                    for (int j = 0; j < refundacje.getLength(); j++) {
+                        Node refundacja = refundacje.item(j);
+                        Element refdacjaElement = (Element) refundacja;
+                        NodeList refundacjaNode = refdacjaElement.getElementsByTagName("poziomOdplatnosciEnum");
+                        if (refundacjaNode.getLength() != 0) {
+                            for(int k=0; k < refundacjaNode.getLength(); k++) {
+                                if (refundacjaNode.item(0).getTextContent().equals(poziomOdplatnosci)) {
+
+                                    NodeList wskazania = ((Element) refundacja).getElementsByTagName("wskazanie");
+                                    Element wskaznieNode = (Element) wskazania.item(0);
+
+                                    wskaznieNode.setAttribute("idWskazania",idWskazania);
+
+                                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                                    Transformer transformer = transformerFactory.newTransformer();
+                                    DOMSource domSource = new DOMSource(doc);
+                                    StreamResult streamResult = new StreamResult(new File(pathTofile));
+
+                                    transformer.transform(domSource, streamResult);
+                                }
                             }
                         }
                     }

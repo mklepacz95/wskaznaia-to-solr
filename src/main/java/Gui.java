@@ -10,12 +10,14 @@ public class Gui extends JPanel {
     JLabel lblWsk;
     JButton merge;
     JButton wygenerujRPM;
+    JButton wytynijZSolr;
 
     JFileChooser chooser;
     String choosertitle;
 
     XmlProcessor xmlProcessor;
     ExcelProcessor excelProcessor;
+    WytnijWezlyZSolr wytnijWezlyZSolr;
 
     public Gui() {
 
@@ -77,6 +79,18 @@ public class Gui extends JPanel {
         });
         add(merge);
 
+
+        wytynijZSolr = new JButton("Usuwanie z SOLR");
+        wytynijZSolr.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                wytnijWezlyZSolr = new WytnijWezlyZSolr(lblSolr.getText(), lblWsk.getText());
+                wytnijWezlyZSolr.odczytEanZExecla();
+            }
+        });
+        add(wytynijZSolr);
+
+
+
         wygenerujRPM = new JButton("Wygenruj RPM");
         merge.setPreferredSize(new Dimension(300,20));
         wygenerujRPM.addActionListener(new ActionListener() {
@@ -91,7 +105,7 @@ public class Gui extends JPanel {
     }
 
     public Dimension getPreferredSize(){
-        return new Dimension(310, 220);
+        return new Dimension(310, 320);
     }
 
 }
