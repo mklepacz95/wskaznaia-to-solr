@@ -78,7 +78,6 @@ public class XmlProcessor {
 
                                 wskazniaNode.appendChild(wskazanieElementToAdd);
 
-
                                 TransformerFactory transformerFactory = TransformerFactory.newInstance();
                                 Transformer transformer = transformerFactory.newTransformer();
                                 DOMSource domSource = new DOMSource(doc);

@@ -94,9 +94,12 @@ public class ExcelProcessor {
                                     if (wskazanie.contains("\n")) {
                                         wskazanie = wskazanie.replace("\n", " ");
                                     }
-                                    if (!poziomWskazania.contains(poziomPoprzedni)) {
-                                        tytul = "";
+                                    if(poziomWskazania.length() > 1) {
+                                        if (!poziomWskazania.contains(poziomPoprzedni.substring(0, poziomWskazania.length() - 2))) {
+                                            tytul = "";
+                                        }
                                     }
+                                    else tytul = "";
                                     wskazanie = wskazanie.trim();
                                     wskazanie = wskazanie.replaceFirst(wskazanie.substring(0, 1), wskazanie.substring(0, 1).toUpperCase());
                                     if (poziomWskazania != null) {
@@ -106,24 +109,24 @@ public class ExcelProcessor {
                                             wskazanie = wskazanie.replaceFirst(wskazanie.substring(0, 1), wskazanie.substring(0, 1).toUpperCase());
                                             tytul = wskazanie;
                                             //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
-                                            System.out.println("Pattern");
-                                        } else {
+                                        }
+                                        else {
                                             if (!tytul.equals(wskazanie)) {
                                                 //System.out.println(Pattern.matches("\\d{1}.0",poziomWskazania));
                                                 //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
                                                 wskazanie = wskazanie.replaceFirst(wskazanie.substring(0, 1), wskazanie.substring(0, 1).toLowerCase());
                                                 if (!tytul.equals("")) {
                                                     tytul = tytul.replaceFirst(tytul.substring(0, 1), tytul.substring(0, 1).toUpperCase());
+                                                    //Usunac ":" w next wersion bo tak i dać albo "-" albo nic - do obgadania
                                                     if(tytul.trim().endsWith(":") || tytul.trim().endsWith(".") || tytul.trim().endsWith("-")) {
                                                         wskazanie = tytul + " " + wskazanie;
                                                     }
                                                     else {
                                                         wskazanie = tytul + " - " + wskazanie;
                                                     }
-                                                }
-                                                tytul = wskazanie;
+                                                } else tytul = wskazanie;
                                                 System.out.println("no pattern");
-                                            }
+                                            } else tytul = wskazanie;
                                         }
                                     }
                                     //System.out.println("Poziom: " + poziomWskazania + " Tytul: " + tytul + " wskazanie: " + wskazanie);
@@ -168,7 +171,28 @@ public class ExcelProcessor {
                         } else {
                             next = String.valueOf(sheet.getRow(row.getRowNum() + 1).getCell(3).getNumericCellValue());
                         }
-                        if(!poziomWskazania.contains(".")) {
+
+                        if(eanPoprzedni != ean) {
+                            if (poziomWskazania.contains(".")) {//z kropka
+                                //jak nastepny nie ma poziomu poprzedniego -> zapisz do xmla
+                                //jak nastpeny ma poziom w sobie to dodaj wskazanie do tytulu
+                                if (!next.contains(poziomWskazania)) {
+                                    xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
+                                } else tytul = wskazanie;
+                            } else { //bez kropki
+                                //jak next zawiera . -> dodaj do xmla
+                                //jak zawiera . -> weź to jako tytul
+
+                                //xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
+                                if (!next.contains(poziomWskazania + ".")) {
+                                    xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
+                                } else tytul = wskazanie;
+                            }
+                        } else {
+                            xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
+                        }
+                        /*
+                        if(!poziomWskazania.contains(".") && !next.contains(poziomWskazania + ".")) {
                             if (ean != null && poziomOdplatnosci != null && wskazanie != null && rodzjaWskazania != null) {
                                 xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
                             }
@@ -177,6 +201,8 @@ public class ExcelProcessor {
                                 xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
                             }
                         }
+
+                         */
                     } else {
                         System.out.println("po else" + sheet.getSheetName());
                         //TO-DO dla if(nazwa_arkusza) != a1
