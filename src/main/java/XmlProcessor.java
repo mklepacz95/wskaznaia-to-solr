@@ -11,10 +11,6 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.lang.annotation.ElementType;
-import java.math.BigInteger;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 
 public class XmlProcessor {
@@ -27,7 +23,10 @@ public class XmlProcessor {
 
     public XmlProcessor(){}
 
-    public void dodajWskazanieDoXml(String ean, String poziomOdplatnosci, String wskazanie, String rodzajWskazania, String wiekOd, String wiekDo, String idWskazania) {
+    public void dodajWskazanieDoXml(String ean, String poziomOdplatnosci, String wskazanie, String rodzajWskazania, String wiekOd, String wiekDo, String idWskazania) { //}, String numerGrupy, String nazwaGrupy) {
+
+        System.out.println(idWskazania);
+
         try {
             File file = new File(pathTofile);
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -53,6 +52,35 @@ public class XmlProcessor {
                         NodeList refundacjaNode = refdacjaElement.getElementsByTagName("poziomOdplatnosciEnum");
                         if (refundacjaNode.getLength() != 0) {
                             if (refundacjaNode.item(0).getTextContent().equals(poziomOdplatnosci)) {
+
+/*
+                                NodeList grupaNodeList = refdacjaElement.getElementsByTagName("grupaLimitowa");
+                                Element grupaLimitowaElemet = (Element) grupaNodeList.item(0);
+
+                                NodeList numer = grupaLimitowaElemet.getElementsByTagName("numer");
+
+
+
+
+                                if(numer.getLength() == 0) {
+                                    Element numerGrupyLimitowej = doc.createElement("numer");
+                                    numerGrupyLimitowej.appendChild(doc.createTextNode(numerGrupy));
+                                    grupaLimitowaElemet.appendChild(numerGrupyLimitowej);
+
+                                    Element nazwaGrupyLimitowej = doc.createElement("nazwa");
+                                    nazwaGrupyLimitowej.appendChild(doc.createTextNode(nazwaGrupy));
+                                    grupaLimitowaElemet.appendChild(nazwaGrupyLimitowej);
+
+                                }
+
+
+
+                                //refdacjaElement.appendChild(grupaLimitowaElement);
+
+
+
+ */
+
 
 
                                 NodeList wskazania = ((Element) refundacja).getElementsByTagName("wskazania");
@@ -80,6 +108,7 @@ public class XmlProcessor {
 
                                 TransformerFactory transformerFactory = TransformerFactory.newInstance();
                                 Transformer transformer = transformerFactory.newTransformer();
+                                transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
                                 DOMSource domSource = new DOMSource(doc);
                                 StreamResult streamResult = new StreamResult(new File(pathTofile));
 
@@ -104,7 +133,7 @@ public class XmlProcessor {
         }
     }
 
-    public void dodajIdWskazaniaA2A3(String ean, String poziomOdplatnosci, String idWskazania) {
+    public void dodajIdWskazaniaA2A3(String ean, String poziomOdplatnosci, String idWskazania, String wiekOd, String wiekDo) { //, String numerGrupy, String nazwaGrupy) {
         try {
             File file = new File(pathTofile);
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -132,13 +161,56 @@ public class XmlProcessor {
                             for(int k=0; k < refundacjaNode.getLength(); k++) {
                                 if (refundacjaNode.item(0).getTextContent().equals(poziomOdplatnosci)) {
 
-                                    NodeList wskazania = ((Element) refundacja).getElementsByTagName("wskazanie");
+
+                                    //Element ref = (Element) refundacjaNode.item(0);
+/*
+                                    Element grupaLimitowaElement = doc.createElement("grupaLimitowa");
+
+                                    Element numerGrupyLimitowej = doc.createElement("numer");
+                                    numerGrupyLimitowej.appendChild(doc.createTextNode(numerGrupy));
+                                    grupaLimitowaElement.appendChild(numerGrupyLimitowej);
+
+                                    Element nazwaGrupyLimitowej = doc.createElement("nazwa");
+                                    nazwaGrupyLimitowej.appendChild(doc.createTextNode(nazwaGrupy));
+                                    grupaLimitowaElement.appendChild(nazwaGrupyLimitowej);
+
+                                    //ref.appendChild(grupaLimitowaElement);
+                                    */
+
+                                    Element ref = (Element) refundacja;
+
+
+                                    /*
+                                    NodeList grupaNodeList = ref.getElementsByTagName("grupaLimitowa");
+                                    Element grupaLimitowaElemet = (Element) grupaNodeList.item(0);
+
+                                    NodeList numer = grupaLimitowaElemet.getElementsByTagName("numer");
+
+                                    if(numer.getLength() == 0) {
+                                        Element numerGrupyLimitowej = doc.createElement("numer");
+                                        numerGrupyLimitowej.appendChild(doc.createTextNode(numerGrupy));
+                                        grupaLimitowaElemet.appendChild(numerGrupyLimitowej);
+
+                                        Element nazwaGrupyLimitowej = doc.createElement("nazwa");
+                                        nazwaGrupyLimitowej.appendChild(doc.createTextNode(nazwaGrupy));
+                                        grupaLimitowaElemet.appendChild(nazwaGrupyLimitowej);
+
+                                    }
+
+                                     */
+
+
+                                    NodeList wskazania = ref.getElementsByTagName("wskazanie");
                                     Element wskaznieNode = (Element) wskazania.item(0);
 
                                     wskaznieNode.setAttribute("idWskazania",idWskazania);
+                                    wskaznieNode.setAttribute("wiekOd", wiekOd);
+                                    wskaznieNode.setAttribute("wiekDo", wiekDo);
+
 
                                     TransformerFactory transformerFactory = TransformerFactory.newInstance();
                                     Transformer transformer = transformerFactory.newTransformer();
+                                    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
                                     DOMSource domSource = new DOMSource(doc);
                                     StreamResult streamResult = new StreamResult(new File(pathTofile));
 
@@ -402,6 +474,7 @@ public class XmlProcessor {
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             DOMSource domSource = new DOMSource(document);
             StreamResult streamResult = new StreamResult(new File("src/file/prac.xml"));
 

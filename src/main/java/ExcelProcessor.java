@@ -2,7 +2,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
@@ -49,6 +48,8 @@ public class ExcelProcessor {
                     String poziomWskazania = null;
                     String eanPoprzedni = null;
                     String idWskazania = null;
+                    String numerGrupy = null;
+                    String nazwaGrupy = null;
                     if (sheet.getSheetName().equals("A1")) {
                         while (cellIterator.hasNext()) {
                             Cell cell = cellIterator.next();
@@ -77,8 +78,10 @@ public class ExcelProcessor {
                                     if (cell.getCellType() == CellType.STRING) {
                                         poziomWskazania = cell.getStringCellValue();
                                     } else poziomWskazania = String.valueOf(cell.getNumericCellValue());
+
                                     poziomWskazania.trim();
-                                    System.out.println(poziomWskazania);
+                                    //if(poziomWskazania.contains("'")) poziomWskazania = poziomWskazania.substring(1);
+                                    System.out.println(poziomWskazania + " typ: " + cell.getCellType());
                                     if (poziomWskazania.contains(".")) {
                                         if (poziomWskazania.substring(poziomWskazania.indexOf(".") + 1, poziomWskazania.indexOf(".") + 2).equals("0")) {
                                             //System.out.println("index: " + poziomWskazania.indexOf("."));
@@ -159,24 +162,43 @@ public class ExcelProcessor {
                                         System.out.println("wiek od: " + wiekOd);
                                     }
                                     break;
+                                    /*
+                                case 7:
+                                    String grupa = cell.getStringCellValue();
+                                    String[] grupaSplit = grupa.split(",");
+                                    numerGrupy = grupaSplit[0].trim();
+                                    nazwaGrupy = grupaSplit[1].trim();
+                                    break;
+
+                                     */
                             }
                         }
 
-                        eanPoprzedni = ean;
+
                         poziomPoprzedni = poziomWskazania;
                         String next = "";
+                        String nextEan = "";
                         //System.out.println(sheet.getRow(row.getRowNum() + 1).getCell(3).getStringCellValue());
                         if (sheet.getRow(row.getRowNum() + 1).getCell(3).getCellType() == CellType.STRING) {
                             next = sheet.getRow(row.getRowNum() + 1).getCell(3).getStringCellValue();
                         } else {
                             next = String.valueOf(sheet.getRow(row.getRowNum() + 1).getCell(3).getNumericCellValue());
                         }
+                        if (sheet.getRow(row.getRowNum() + 1).getCell(1).getCellType() == CellType.STRING) {
+                            nextEan = sheet.getRow(row.getRowNum() + 1).getCell(1).getStringCellValue();
+                        } else {
+                            nextEan = String.valueOf(sheet.getRow(row.getRowNum() + 1).getCell(1).getNumericCellValue());
+                        }
 
-                        if(eanPoprzedni != ean) {
-                            if (poziomWskazania.contains(".")) {//z kropka
+                        if(ean.equals(nextEan) || ean.equals("0"+nextEan) || ean.substring(1,14).equals(nextEan)) {
+                            if(poziomWskazania.equals(next) || next.equals(poziomWskazania+".0") || next.equals(""))
+                                //xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania,numerGrupy, nazwaGrupy);
+                                xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
+                            else if (poziomWskazania.contains(".")) {//z kropka
                                 //jak nastepny nie ma poziomu poprzedniego -> zapisz do xmla
                                 //jak nastpeny ma poziom w sobie to dodaj wskazanie do tytulu
                                 if (!next.contains(poziomWskazania)) {
+                                    //xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania, numerGrupy, nazwaGrupy);
                                     xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
                                 } else tytul = wskazanie;
                             } else { //bez kropki
@@ -185,10 +207,12 @@ public class ExcelProcessor {
 
                                 //xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
                                 if (!next.contains(poziomWskazania + ".")) {
+                                    //xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania, numerGrupy, nazwaGrupy);
                                     xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
                                 } else tytul = wskazanie;
                             }
                         } else {
+                            //xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania, numerGrupy, nazwaGrupy);
                             xmlProcessor.dodajWskazanieDoXml(ean, poziomOdplatnosci, wskazanie, rodzjaWskazania, wiekOd, wiekDo, idWskazania);
                         }
                         /*
@@ -203,8 +227,13 @@ public class ExcelProcessor {
                         }
 
                          */
+                        eanPoprzedni = ean;
+
                     } else {
                         System.out.println("po else" + sheet.getSheetName());
+                        String nazwaGrupyA2A3 = null;
+                        String numerGrupyA2A3 = null;
+
                         //TO-DO dla if(nazwa_arkusza) != a1
                         while (cellIterator.hasNext()) {
                             Cell cell = cellIterator.next();
@@ -231,9 +260,31 @@ public class ExcelProcessor {
                                     else if (poziomOdplatnosci.equals("B") || poziomOdplatnosci.equals("BEZPŁATNY DO LIMITU"))
                                         poziomOdplatnosci = "BEZPŁATNY_DO_LIMITU";
                                     break;
+                                case 4:
+                                    wiek = cell.getStringCellValue();
+                                    System.out.println(cell.getStringCellValue());
+                                //case 5:
+
+                                    if(cell.getCellType() == CellType.STRING) {
+                                        if (wiek == null) wiek = "";
+
+                                        wiek = wiek.trim().toUpperCase();
+                                        if (wiek.contains("DO") && wiek.contains("OD")) {
+                                            wiekDo = wiek.substring(wiek.indexOf("DO ") + 3);
+                                            wiekOd = wiek.substring(wiek.indexOf("OD ") + 3, wiek.indexOf(" DO"));
+                                            System.out.println("wiek od: " + wiekOd + " wiek do: " + wiekDo);
+                                        } else if (wiek.contains("DO")) {
+                                            wiekDo = wiek.substring(wiek.indexOf("DO ") + 3).trim();
+                                            System.out.println(" wiek do: " + wiekDo);
+                                        } else if (wiek.contains("OD")) {
+                                            wiekOd = wiek.substring(wiek.indexOf("OD ") + 3).trim();
+                                            System.out.println("wiek od: " + wiekOd);
+                                        }
+                                    } else System.out.println("Bledy typ komórki");
+                                    break;
                             }
                             if(ean != null && poziomOdplatnosci != null  && idWskazania != null)
-                            xmlProcessor.dodajIdWskazaniaA2A3(ean, poziomOdplatnosci, idWskazania);
+                            xmlProcessor.dodajIdWskazaniaA2A3(ean, poziomOdplatnosci, idWskazania, wiekOd, wiekDo); //,numerGrupyA2A3, nazwaGrupyA2A3);
                         }
                     }
                 }
